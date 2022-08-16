@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Portfolio</title>
+    <title>The Cube.</title>
     <link href="css/foundation.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="images/vessel2_render_final_square.png">
@@ -16,7 +16,7 @@
     <h1 class="text-center">The Cube.</h1>
 <!--    <sup>*There are many other things, like Dungeons & Dragons, hiking, and playing the guitar; but for the sake of the portfolio, I will highlight my technical skills.</sup>-->
     <div class="card">
-        <div class="card-divider">Check out this graphics web app!</div>
+        <div class="card-divider">It watches.</div>
         <div class="card-section">
             <canvas id="glCanvas" width="640" height="480"></canvas>
         </div>
@@ -36,16 +36,21 @@
 
         const vsSource = `
             attribute vec4 aVertexPosition;
+            attribute vec4 aVertexNormal;
             attribute vec4 aVertexColor;
 
             uniform mat4 uModelViewMatrix;
             uniform mat4 uProjectionMatrix;
 
             varying lowp vec4 vColor;
+            varying vec3 fragPos;
+            varying vec3 normal;
 
             void main() {
               gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
               vColor = aVertexColor;
+              //normal = aVertexNormal;
+              //fragPos = vec3(uModelMatrix*vec4(aVertexPosition, 1.0)).xyz
             }
         `;
 
@@ -67,7 +72,8 @@
 
             uniformLocations: {
                 projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix')
+                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+                //modelMatrix: gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
             },
         };
 
@@ -122,6 +128,10 @@
             -1.0, -1.0,  1.0,
             -1.0,  1.0,  1.0,
             -1.0,  1.0, -1.0,
+        ];
+
+        const dodecPositions = [
+
         ];
         const positionBuffer = gl.createBuffer();
         //const posisionData = new Float32Array(positions);
