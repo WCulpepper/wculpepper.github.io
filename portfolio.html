@@ -5,6 +5,7 @@
     <title>Portfolio</title>
     <link href="css/foundation.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="images/vessel2_render_final_square.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
             integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
             crossorigin="anonymous" defer>
@@ -23,6 +24,7 @@
 </div>
 </body>
 <script>
+    var rotationAngle = 0.0;
     function main(){
         const canvas = document.querySelector("#glCanvas");
         const gl = canvas.getContext("webgl");
@@ -34,18 +36,23 @@
 
         const vsSource = `
             attribute vec4 aVertexPosition;
+            attribute vec4 aVertexColor;
 
             uniform mat4 uModelViewMatrix;
             uniform mat4 uProjectionMatrix;
 
+            varying lowp vec4 vColor;
+
             void main() {
               gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+              vColor = aVertexColor;
             }
         `;
 
         const fsSource = `
+            varying lowp vec4 vColor;
             void main() {
-              gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+              gl_FragColor = vColor;
             }
         `;
 
@@ -55,6 +62,7 @@
             program: shaderProgram,
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+                vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
             },
 
             uniformLocations: {
@@ -63,13 +71,22 @@
             },
         };
 
-        initBuffers(gl);
-        drawScene(gl, programInfo);
+        const buffers = initBuffers(gl);
+
+        let then = 0;
+        function render(now){
+            now *= 0.001;
+            const deltaTime = now - then;
+            then = now;
+            drawScene(gl, programInfo, buffers, deltaTime);
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
 
     }
     function initBuffers(gl){
         const positionBuffer = gl.createBuffer();
-
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
         const positions = [
@@ -80,9 +97,26 @@
         ];
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        const colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+
+        const colors = [
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 0.0, 0.0, 1.0,
+            0.0, 1.0, 0.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+        ]
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+        return{
+            position: positionBuffer,
+            color: colorBuffer
+        };
     }
 
-    function drawScene(gl, programInfo){
+    function drawScene(gl, programInfo, buffers, deltaTime){
         gl.clearColor(0.0,0.0,0.0,1.0);
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
@@ -98,11 +132,14 @@
         const projMatrix = mat4.create();
 
         mat4.perspective(projMatrix, fov, aspect, zNear, zFar);
-        console.log(projMatrix);
 
         const mvMatrix = mat4.create();
 
+        //brings the square to the camera's view
         mat4.translate(mvMatrix, mvMatrix, [-0.0,0.0,-6.0]);
+
+        rotationAngle += deltaTime;
+        mat4.rotate(mvMatrix, mvMatrix, rotationAngle, [0,0,1]);
 
         {
             const numComponents = 2;
@@ -111,6 +148,7 @@
             const stride = 0;
 
             const offset = 0;
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
             gl.vertexAttribPointer(
                 programInfo.attribLocations.vertexPosition,
                 numComponents,
@@ -121,6 +159,26 @@
             );
 
             gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+        }
+
+        {
+            const numComponents = 4;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+            gl.vertexAttribPointer(
+                programInfo.attribLocations.vertexColor,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+
+            gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
         }
 
         gl.useProgram(programInfo.program);
