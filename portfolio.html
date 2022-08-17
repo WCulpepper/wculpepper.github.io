@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Cube.</title>
+    <title>Will Culpepper's Digital Portfolio</title>
     <link href="css/foundation.min.css" rel="stylesheet">
     <link href="css/app.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="images/vessel2_render_final_square.png">
@@ -30,34 +30,45 @@
         const gl = canvas.getContext("webgl");
 
         if(gl == null){
-            alert("Unable to initialize webGL app. Your browser might not support it.");
+            alert("Unable to initialize WebGL app. Your browser might not support it.");
             return;
         }
 
         const vsSource = `
             attribute vec4 aVertexPosition;
-            attribute vec4 aVertexNormal;
+            attribute vec3 aVertexNormal;
             attribute vec4 aVertexColor;
 
             uniform mat4 uModelViewMatrix;
             uniform mat4 uProjectionMatrix;
+            uniform mat4 uNormalMatrix;
 
             varying lowp vec4 vColor;
-            varying vec3 fragPos;
-            varying vec3 normal;
+            varying highp vec3 vLightingIntensity;
 
             void main() {
               gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+
+              highp vec3 ambience = vec3(0.3,0.3,0.3);
+              highp vec3 lightColor = vec3(1.0,1.0,1.0);
+
+              // using directional lighting in this test.
+              highp vec3 direction = normalize(vec3(1.0, 1.0, 1.0));
+
+              highp vec4 tNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+
+              highp float directionalDiffuse = max(dot(tNormal.xyz, direction), 0.0);
+
+              vLightingIntensity = ambience + (lightColor*directionalDiffuse);
               vColor = aVertexColor;
-              //normal = aVertexNormal;
-              //fragPos = vec3(uModelMatrix*vec4(aVertexPosition, 1.0)).xyz
             }
         `;
 
         const fsSource = `
             varying lowp vec4 vColor;
+            varying highp vec3 vLightingIntensity;
             void main() {
-              gl_FragColor = vColor;
+              gl_FragColor = vec4(vColor.rgb * vLightingIntensity, vColor.a);
             }
         `;
 
@@ -68,12 +79,13 @@
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
                 vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+                vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
             },
 
             uniformLocations: {
                 projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
                 modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-                //modelMatrix: gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
+                normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix')
             },
         };
 
@@ -167,12 +179,9 @@
 
         const colors = [];
         for(const c of faceColors){
-            //console.log(c);
             colors.push(c, c, c, c);
-            //console.log(colors);
         }
-        const colorData = new Float32Array(colors);
-        console.log(colorData);
+
         const colorBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(faceColors), gl.STATIC_DRAW);
@@ -189,10 +198,54 @@
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
+        const vertexNormals = [
+            // front
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+
+            // back
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+
+            // top
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+
+            // bottom
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+
+            // right
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+
+            // left
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+        ]
+
+        const normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+
         return{
             position: positionBuffer,
             color: colorBuffer,
             index_buffer: indexBuffer,
+            normals: normalBuffer,
         };
     }
 
@@ -206,11 +259,10 @@
 
         const fov = 45 * Math.PI/180;
         const aspect = gl.canvas.clientWidth/gl.canvas.clientHeight;
-
         const zNear = 0.1;
         const zFar = 100.0;
-        const projMatrix = mat4.create();
 
+        const projMatrix = mat4.create();
         mat4.perspective(projMatrix, fov, aspect, zNear, zFar);
 
         const mvMatrix = mat4.create();
@@ -223,13 +275,18 @@
         mat4.rotate(mvMatrix, mvMatrix, rotationAngle*0.7, [0,1,0]);
         mat4.rotate(mvMatrix, mvMatrix, rotationAngle*0.1, [1,0,0]);
 
+        const normalMatrix = mat4.create();
+        mat4.invert(normalMatrix, mvMatrix);
+        //console.log(normalMatrix);
+
+        // binds vertex positions to the shader attribute
         {
             const numComponents = 3;
             const type = gl.FLOAT;
             const normalize = false;
             const stride = 0;
-
             const offset = 0;
+
             gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
             gl.vertexAttribPointer(
                 programInfo.attribLocations.vertexPosition,
@@ -243,6 +300,7 @@
             gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
         }
 
+        // binds the colors to the shader attribute
         {
             const numComponents = 4;
             const type = gl.FLOAT;
@@ -262,13 +320,36 @@
 
             gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
         }
-        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index_buffer)
+
+        {
+            const numComponents = 3;
+            const type = gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normals);
+            gl.vertexAttribPointer(
+                programInfo.attribLocations.vertexNormal,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset
+            );
+
+            gl.enableVertexAttribArray(programInfo.attribLocations.vertexNormal);
+        }
+
+        // binds indices to the shader for color correspondence to vertices.
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index_buffer)
 
 
         gl.useProgram(programInfo.program);
 
         gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projMatrix);
         gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, mvMatrix);
+        gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
         {
             const vertexCount = 36;
             const type = gl.UNSIGNED_SHORT;
