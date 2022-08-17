@@ -43,13 +43,11 @@
             uniform mat4 uProjectionMatrix;
             uniform mat4 uNormalMatrix;
 
-            varying lowp vec4 vColor;
-            varying highp vec3 vLightingIntensity;
+            varying highp vec3 diffuseColor;
 
             void main() {
               gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 
-              highp vec3 ambience = vec3(0.3,0.3,0.3);
               highp vec3 lightColor = vec3(1.0,1.0,1.0);
 
               // using directional lighting in this test.
@@ -57,18 +55,16 @@
 
               highp vec4 tNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
 
-              highp float directionalDiffuse = max(dot(tNormal.xyz, direction), 0.0);
+              highp float directionalDiffuse = max(dot(aVertexNormal, direction), 0.0);
 
-              vLightingIntensity = ambience + (lightColor*directionalDiffuse);
-              vColor = aVertexColor;
+              diffuseColor = lightColor*aVertexColor.xyz*directionalDiffuse;
             }
         `;
 
         const fsSource = `
-            varying lowp vec4 vColor;
-            varying highp vec3 vLightingIntensity;
+            varying highp vec3 diffuseColor;
             void main() {
-              gl_FragColor = vec4(vColor.rgb * vLightingIntensity, vColor.a);
+              gl_FragColor = vec4(diffuseColor,1.0);
             }
         `;
 
