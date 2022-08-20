@@ -13,10 +13,15 @@
 </head>
 <body>
 <div class="grid-container grid-padding-y">
-    <h1 class="text-center">The Cube.</h1>
+    <div class="top-bar-title">
+        <h1 class="text-center">The Cube.</h1>
+    </div>
 <!--    <sup>*There are many other things, like Dungeons & Dragons, hiking, and playing the guitar; but for the sake of the portfolio, I will highlight my technical skills.</sup>-->
     <div class="card">
-        <div class="card-divider">It watches.</div>
+        <div class="card-divider"><p>This was a fun little project. I wanted to have something in this website that showed
+            that I can work with graphics in a multitude of environments, so I followed
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API" target="_blank">Mozilla's tutorial on WebGL.</a>
+            The pipeline is pretty much identical to OpenGL, so it was easy to wrap my head around.</p></div>
         <div class="card-section">
             <canvas id="glCanvas" width="640" height="480"></canvas>
         </div>
@@ -34,7 +39,7 @@
             return;
         }
 
-        const vsSource = `
+        const vsSourceGouraud = `
             attribute vec4 aVertexPosition;
             attribute vec3 aVertexNormal;
             attribute vec4 aVertexColor;
@@ -61,29 +66,105 @@
             }
         `;
 
-        const fsSource = `
+        const fsSourceGouraud = `
             varying highp vec3 diffuseColor;
             void main() {
               gl_FragColor = vec4(diffuseColor,1.0);
             }
         `;
 
-        const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+        const vsSourcePhong = `
+            attribute vec4 aVertexPosition;
+            attribute vec3 aVertexNormal;
 
-        const programInfo = {
-            program: shaderProgram,
+            uniform mat4 uModelViewMatrix;
+            uniform mat4 uProjectionMatrix;
+            uniform mat4 uNormalMatrix;
+
+            varying highp vec3 normal;
+            varying highp vec3 fragPos;
+
+            void main(){
+                gl_Position = gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+
+                fragPos = vec3(uModelViewMatrix*aVertexPosition);
+                normal = normalize(vec3(uNormalMatrix*vec4(aVertexNormal, 1.0)));
+            }
+        `;
+
+        const fsSourcePhong = `
+            precision highp float;
+            // using point light for Phong shading.
+            highp vec3 lightPos = vec3(10.0,10.0,10.0);
+            highp vec3 lightColor = vec3(1.0,1.0,1.0);
+            highp vec3 cubeDiffColor = vec3(0.5, 0.25, 1.0);
+            highp vec3 cubeSpecColor = vec3(1.0,1.0,0.0);
+            highp float cubeShininess = 0.5;
+            highp vec3 eyePos = vec3(0.0,0.0,0.0);
+
+            varying highp vec3 normal;
+            varying highp vec3 fragPos;
+
+            vec3 diffuse(vec3 fragmentPos, vec3 fragmentNorm){
+                vec3 lightVector = -normalize(lightPos - fragmentPos);
+
+                vec3 diffColor = lightColor*cubeDiffColor*max(dot(fragmentNorm, lightVector), 0.0);
+
+                return diffColor;
+            }
+
+            vec3 specular(vec3 fragmentPos, vec3 fragmentNorm){
+                vec3 lightVector = normalize(lightPos - fragmentPos);
+
+                vec3 viewVector = normalize(eyePos - fragmentPos);
+                vec3 halfwayVector = normalize(viewVector + lightVector);
+
+                vec3 specColor = lightColor*cubeSpecColor*pow(max(dot(fragmentNorm, halfwayVector), 0.0), 4.0*cubeShininess);
+
+                return specColor;
+            }
+
+            void main(){
+                vec3 norm = normalize(normal);
+                vec3 diff = diffuse(fragPos, norm);
+                vec3 spec = specular(fragPos, norm);
+                gl_FragColor = vec4(diff + spec, 1.0);
+            }
+
+        `;
+
+        const shaderProgramGouraud = initShaderProgram(gl, vsSourceGouraud, fsSourceGouraud);
+        const shaderProgramPhong = initShaderProgram(gl, vsSourcePhong,  fsSourcePhong);
+
+        const programInfoGouraud = {
+            program: shaderProgramGouraud,
             attribLocations: {
-                vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-                vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-                vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
+                vertexPosition: gl.getAttribLocation(shaderProgramGouraud, 'aVertexPosition'),
+                vertexColor: gl.getAttribLocation(shaderProgramGouraud, 'aVertexColor'),
+                vertexNormal: gl.getAttribLocation(shaderProgramGouraud, 'aVertexNormal'),
             },
 
             uniformLocations: {
-                projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-                normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix')
+                projectionMatrix: gl.getUniformLocation(shaderProgramGouraud, 'uProjectionMatrix'),
+                modelViewMatrix: gl.getUniformLocation(shaderProgramGouraud, 'uModelViewMatrix'),
+                normalMatrix: gl.getUniformLocation(shaderProgramGouraud, 'uNormalMatrix')
             },
         };
+
+        const programInfoPhong = {
+            program: shaderProgramPhong,
+            attribLocations: {
+                vertexPosition: gl.getAttribLocation(shaderProgramPhong, 'aVertexPosition'),
+                vertexColor: gl.getAttribLocation(shaderProgramPhong, 'aVertexColor'),
+                vertexNormal: gl.getAttribLocation(shaderProgramPhong, 'aVertexNormal'),
+            },
+
+            uniformLocations: {
+                projectionMatrix: gl.getUniformLocation(shaderProgramPhong, 'uProjectionMatrix'),
+                modelViewMatrix: gl.getUniformLocation(shaderProgramPhong, 'uModelViewMatrix'),
+                normalMatrix: gl.getUniformLocation(shaderProgramPhong, 'uNormalMatrix')
+            },
+        }
 
         const buffers = initBuffers(gl);
 
@@ -92,7 +173,7 @@
             now *= 0.001;
             const deltaTime = now - then;
             then = now;
-            drawScene(gl, programInfo, buffers, deltaTime);
+            drawScene(gl, programInfoPhong, buffers, deltaTime);
             requestAnimationFrame(render);
         }
 
@@ -136,10 +217,6 @@
             -1.0, -1.0,  1.0,
             -1.0,  1.0,  1.0,
             -1.0,  1.0, -1.0,
-        ];
-
-        const dodecPositions = [
-
         ];
         const positionBuffer = gl.createBuffer();
         //const posisionData = new Float32Array(positions);
