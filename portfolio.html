@@ -76,6 +76,7 @@
         const vsSourcePhong = `
             attribute vec4 aVertexPosition;
             attribute vec3 aVertexNormal;
+            attribute vec4 aVertexColor;
 
             uniform mat4 uModelViewMatrix;
             uniform mat4 uProjectionMatrix;
@@ -83,12 +84,14 @@
 
             varying highp vec3 normal;
             varying highp vec3 fragPos;
+            varying highp vec3 vertColor;
 
             void main(){
                 gl_Position = gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 
                 fragPos = vec3(uModelViewMatrix*aVertexPosition);
                 normal = normalize(vec3(uNormalMatrix*vec4(aVertexNormal, 1.0)));
+                vertColor = aVertexColor.xyz;
             }
         `;
 
@@ -104,6 +107,7 @@
 
             varying highp vec3 normal;
             varying highp vec3 fragPos;
+            varying highp vec3 vertColor;
 
             vec3 diffuse(vec3 fragmentPos, vec3 fragmentNorm){
                 vec3 lightVector = -normalize(lightPos - fragmentPos);
