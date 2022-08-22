@@ -13,15 +13,43 @@
 </head>
 <body>
 <div class="grid-container grid-padding-y">
-    <div class="top-bar-title">
-        <h1 class="text-center">The Cube.</h1>
+    <div data-sticky-container>
+    <div class="top-bar" data-sticky data-options="marginTop:0;" style="width:100%">
+        <div class="top-bar-left">
+            <ul class="dropdown menu" data-dropdown-menu>
+                <li class="menu-text"><a href="index.html" style="color:black">Will Culpepper</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
     </div>
-<!--    <sup>*There are many other things, like Dungeons & Dragons, hiking, and playing the guitar; but for the sake of the portfolio, I will highlight my technical skills.</sup>-->
+    </div>
+    <div class="top-bar-title">
+        <h1 class="text-center">My Work</h1>
+    </div>
+    <div class="card">
+        <div class="card-divider">
+            <h2 class="h2">Highlights of my time at Mines</h2>
+        </div>
+        <div class="card">
+            <div class="card-divider">
+                <h4>Advanced Software Engineering, Summer 2022</h4>
+            </div>
+            <div class="card-section">
+                <p>This class was my second step into coding in a professional setting. I worked on a team of other CS
+                    students to build a web app to replace the Computer Science Department's current auto-grading system
+                    for the major's introductory classes (CSCI 200, CSCI 220, CSCI 250, and more).
+                </p>
+            </div>
+        </div>
+    </div>
     <div class="card">
         <div class="card-divider"><p>This was a fun little project. I wanted to have something in this website that showed
             that I can work with graphics in a multitude of environments, so I followed
             <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API" target="_blank">Mozilla's tutorial on WebGL.</a>
-            The pipeline is pretty much identical to OpenGL, so it was easy to wrap my head around.</p></div>
+            The pipeline is pretty much identical to OpenGL, so it was easy to wrap my head around. This cube currently uses
+            the Blinn-Phong specular model with Lambertian diffuse all in the fragment shader for smoother lighting. The purple
+            shading represents the diffuse, and the yellow represents the specular. Currently, the shader isn't exhibiting
+            its expected behavior. But it looks cool!</p></div>
         <div class="card-section">
             <canvas id="glCanvas" width="640" height="480"></canvas>
         </div>
@@ -97,7 +125,7 @@
         const fsSourcePhong = `
             precision highp float;
             // using point light for Phong shading.
-            highp vec3 lightPos = vec3(10.0,10.0,10.0);
+            highp vec3 lightPos = vec3(5.0,0.0,-5.0);
             highp vec3 lightColor = vec3(1.0,1.0,1.0);
             highp vec3 cubeDiffColor = vec3(0.5, 0.25, 1.0);
             highp vec3 cubeAmbColor = cubeDiffColor*0.1;
@@ -123,7 +151,7 @@
                 vec3 viewVector = normalize(eyePos - fragmentPos);
                 vec3 halfwayVector = normalize(viewVector + lightVector);
 
-                vec3 specColor = lightColor*cubeSpecColor*pow(max(dot(fragmentNorm, halfwayVector), 0.0), 4.0*cubeShininess);
+                vec3 specColor = lightColor*cubeSpecColor*pow(max(dot(fragmentNorm, halfwayVector), 0.0), 2.0*cubeShininess);
 
                 return specColor;
             }
@@ -284,34 +312,34 @@
             0.0, 0.0, 1.0,
 
             // back
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
+            0.0, 0.0, -1.0,
+            0.0, 0.0, -1.0,
+            0.0, 0.0, -1.0,
+            0.0, 0.0, -1.0,
 
             // top
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
 
             // bottom
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
 
             // right
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
 
             // left
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
-            0.0, 0.0, 1.0,
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
         ]
 
         const normalBuffer = gl.createBuffer();
