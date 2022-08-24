@@ -14,15 +14,15 @@
 <body>
 <div class="grid-container grid-padding-y">
     <div data-sticky-container>
-    <div class="top-bar" data-sticky data-options="marginTop:0;" style="width:100%">
-        <div class="top-bar-left">
-            <ul class="dropdown menu align-center-middle" data-dropdown-menu>
-                <li class="menu-text"><a href="index.html" style="color:black">Will Culpepper</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="portfolio.html">Portfolio</a></li>
-            </ul>
+        <div class="top-bar" data-sticky data-options="marginTop:0;" style="width:100%">
+            <div class="top-bar-left">
+                <ul class="dropdown menu align-center-middle" data-dropdown-menu>
+                    <li class="menu-text"><a href="index.html" style="color:black">Will Culpepper</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                </ul>
+            </div>
         </div>
-    </div>
     </div>
     <div class="top-bar-title">
         <h1 class="text-center">My Work</h1>
@@ -39,7 +39,24 @@
                 <p>This class was my second step into coding in a professional setting. I worked on a team of other CS
                     students to build a web app to replace the Computer Science Department's current auto-grading system
                     for the major's introductory classes (CSCI 200, CSCI 220, CSCI 250, and more).
+                    <br><br>
+                    The primary motivator behind this project was to rebuild it in a codebase that was more maintainable
+                    than the previous version. This web app, dubbed "AutoGrader 5.0," is built on a Flask back-end and a
+                    Vue.js front-end. Additionally, the back-end makes queries to a PostgreSQL database used for storing
+                    the programming challenges the faculty uses. Furthermore, we were tasked with making the new AutoGrader
+                    compatible with a screen reader, as differently-abled students are not able to access the site with
+                    the same level of ease as a normally-abled student. The new version of the site is served on a
+                    single-page application, and is fully compatible with a screen reader (tested with NVDA).
+                    <br><br>
+                    This project was tough, in all honesty. Neither I nor any of my teammates had any experience with web
+                    programming (you can probably tell, the CSS we used to customize the site is Bootstrap). Nevertheless,
+                    we were able to get a product to the client that was both up to their standards and an improvement upon
+                    the previous version. I ended the project having acquired skills in HTML, CSS, Javascript, and expanding
+                    on my Python skills with both a server implementation and SQL integration.
                 </p>
+            </div>
+            <div class="card-section align-center-middle">
+                <img src="images/autograder.png" alt="Field Session AutoGrader" width="600" height="600">
             </div>
         </div>
         <div class="card">
@@ -52,13 +69,60 @@
                     course of the semester, my partner and I were able to recreate a version of Clue as a computer game.
                 </p>
             </div>
-            <div class="card-image align-center-middle">
-                <img class="align-center-middle" src="images/clue.png" alt="Clue interface" width="600" height="600">
+            <div class="card-section align-center-middle">
+                <img src="images/clue.png" alt="Clue interface" width="600" height="600">
             </div>
         </div>
     </div>
     <div class="card">
-        <div class="card-divider"><p>This was a fun little project. I wanted to have something in this website that showed
+        <div class="card-divider">
+            <h4>Computer Graphics, Fall 2021</h4>
+        </div>
+        <div class="card-section">
+            <p>
+                This class reignited my passion for computer science, and is the primary focus of what I want to do with
+                my degree once I graduate. Here I learned OpenGL and its use in C++, creating graphics almost entirely
+                from scratch. I learned shader programming and all the intermediary steps from vertex data to screen
+                output (everything from creating the initial vertex buffers to the fragment shader, including tessellation control/evaluation
+                and geometry). I learned how to generate Bezier curves and move objects along them. I learned about
+                particle systems and collision detection. I learned about lighting models (Gouraud shading, Phong/Blinn-Phong
+                illumination) and all kinds of fragment shaders (I even wrote a Cel shader!). Near the end of the semester,
+                I even learned the basics of ray tracing. This class was a blast, and is the reason I still code. I made
+                a portfolio of the work I did in class throughout the semester, which can be found <a href="graphics.html">here</a>.
+            </p>
+        </div>
+        <div class="card-divider">
+            <h4>Other classes I've taken and skills I've acquired while at Mines</h4>
+        </div>
+        <div class="card-section">
+            <h5>Computer Science</h5>
+            <ul>
+                <li>CSCI 101 - Introduction to CS: to sum it up, we just answered the question, "What is Computer Science?"</li>
+                <li>CSCI 102 - Intro to CS Lab: I actually had a job for two semesters as a TA for this class. I taught
+                    Python to people who had little-to-no coding experience.</li>
+                <li>CSCI 250 - Building a Sensor System: Python-based class that integrated hardware and introductory
+                    data science concepts. Acquired and developed skills in Python programming, Linux, Raspberry Pi, and
+                    basic data processing (filters, visualization). Also was a TA for this class for two semesters.</li>
+                <li>CSCI 262 - Data Structures: learned the basics of modern data structures. Linked lists, stacks, queues,
+                    maps, sets, you name it. This class was a particularly tough challenge, since I had never used C++
+                    before entering. I came out of it with more than I went in, including a desire to become an electrical
+                    engineer. That desire lasted exactly one semester before I realized just how much I like coding.</li>
+                <li>CSCI 274 - Introduction to Linux: Here, I learned the basic of Linux (Ubuntu) and the command line.</li>
+                <li>CSCI 341 - Computer Organization: Assembly, memory, registers, process optimization. This class was tough, but since I took
+                    a digital logic course the semester prior I had a leg up on the course going in.</li>
+                <li>CSCI 358 - Discrete Mathematics: logic, proofs, recursion, algorithm analysis, sets, relations,
+                    Boolean algebra, trees, and finite-state machines. I had a lot of fun in this class, and it was the
+                    easiest non-code-based class to wrap my head around.</li>
+                <li>CSCI 400 - Programming Languages: Functional programming, lambda calculus, higher-order functions,
+                    syntax, types, and language evaluation. My project group ended up with a very simple JavaScript
+                    interpreter by the end of the semester.</li>
+                <li>CSCI 403 - Database Management: relational databases, SQL, and data storage. Near the end of the
+                    semester we had a project to make assessments from large data sets about homicide rates and housing
+                    prices in California.</li>
+                <li>CSCI 404 - Artificial Intelligence: </li>
+            </ul>
+        </div>
+        <div class="card-section"><p>You've reached the end of my portfolio, so far. <br>This was a fun little project. I wanted to have something in this website that showed
             that I can work with graphics in a multitude of environments, so I followed
             <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API" target="_blank">Mozilla's tutorial on WebGL.</a>
             The pipeline is pretty much identical to OpenGL, so it was easy to wrap my head around. This cube currently uses
