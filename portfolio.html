@@ -236,7 +236,7 @@
             }
 
             void main(){
-                vec3 norm = normalize(normal);
+                vec3 norm = normal;
                 vec3 diff = diffuse(fragPos, norm);
                 vec3 spec = specular(fragPos, norm);
                 vec3 amb = cubeAmbColor;
@@ -245,8 +245,53 @@
 
         `;
 
+        const fsSourceCel = `
+            precision highp float;
+            // using point light for Phong shading.
+            highp vec3 lightPos = vec3(5.0,0.0,-5.0);
+            highp vec3 lightColor = vec3(1.0,1.0,1.0);
+            highp vec3 cubeDiffColor = vec3(0.5, 0.25, 1.0);
+            highp vec3 cubeAmbColor = cubeDiffColor*0.1;
+            highp vec3 cubeSpecColor = vec3(1.0,1.0,0.0);
+            highp float cubeShininess = 0.5;
+            highp vec3 eyePos = vec3(0.0,0.0,0.0);
+
+            varying highp vec3 normal;
+            varying highp vec3 fragPos;
+            varying highp vec3 vertColor;
+
+            vec3 diff_cel(vec3 fragmentPos, vec3 fragmentNorm){
+                vec3 intensityFactor;
+                vec3 lightVector = -normalize(lightPos - fragmentPos);
+
+                float intensity = dot(lightVector, fragmentNorm);
+
+                if(intensity > 0.95)
+                    intensityFactor = vec3(1.0,1.0,1.0);
+                else if(intensity > 0.75)
+                    intensityFactor = vec3(0.8,0.8,0.8);
+                else if(intensity > 0.50)
+                    intensityFactor = vec3(0.6,0.6,0.6);
+                else if(intensity > 0.25)
+                    intensityFactor = vec3(0.4,0.4,0.4);
+                else
+                    intensityFactor = vec3(0.2,0.2,0.2);
+
+                vec3 diffColor = intensityFactor*lightColor*cubeDiffColor*max(dot(fragmentNorm, lightVector), 0.0);
+
+                return diffColor;
+            }
+
+            void main(){
+                vec3 norm = normalize(normal);
+                vec3 diff = diff_cel(fragPos, norm);
+                //vec3 amb = cubeAmbColor;
+                gl_FragColor = vec4(diff, 1.0);
+            }`
+
         const shaderProgramGouraud = initShaderProgram(gl, vsSourceGouraud, fsSourceGouraud);
         const shaderProgramPhong = initShaderProgram(gl, vsSourcePhong,  fsSourcePhong);
+        const shaderProgramCel = initShaderProgram(gl, vsSourcePhong, fsSourceCel);
 
         const programInfoGouraud = {
             program: shaderProgramGouraud,
@@ -275,6 +320,21 @@
                 projectionMatrix: gl.getUniformLocation(shaderProgramPhong, 'uProjectionMatrix'),
                 modelViewMatrix: gl.getUniformLocation(shaderProgramPhong, 'uModelViewMatrix'),
                 normalMatrix: gl.getUniformLocation(shaderProgramPhong, 'uNormalMatrix')
+            },
+        }
+
+        const programInfoCel = {
+            program: shaderProgramCel,
+            attribLocations: {
+                vertexPosition: gl.getAttribLocation(shaderProgramCel, 'aVertexPosition'),
+                vertexColor: gl.getAttribLocation(shaderProgramCel, 'aVertexColor'),
+                vertexNormal: gl.getAttribLocation(shaderProgramCel, 'aVertexNormal'),
+            },
+
+            uniformLocations: {
+                projectionMatrix: gl.getUniformLocation(shaderProgramCel, 'uProjectionMatrix'),
+                modelViewMatrix: gl.getUniformLocation(shaderProgramCel, 'uModelViewMatrix'),
+                normalMatrix: gl.getUniformLocation(shaderProgramCel, 'uNormalMatrix')
             },
         }
 
@@ -462,6 +522,7 @@
 
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, mvMatrix);
+        mat4.transpose(normalMatrix, normalMatrix);
         //console.log(normalMatrix);
 
         // binds vertex positions to the shader attribute
