@@ -1,0 +1,94 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: "Montserrat";
+    height: 100%;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-bottom: 1px solid #DDD;
+    margin-bottom: 10px;
+}
+
+.narrow-toggle {
+    /* display: flex; */
+    flex-direction: column;
+    border: none;
+    padding: 1%;
+}
+
+.page-content {
+    background-color: black;
+    padding: 2rem;
+    height: 100vh;
+}
+
+.page-border-wrap {
+    padding: 0.5rem;
+    position: relative;
+    background: linear-gradient(to right, #CC4628, #09396C);
+}
+
+a.home-link {
+    color: white;
+    text-decoration: none;
+    max-width: 30%;
+    transition: color 0.5s ease-out 100ms;
+}
+
+a.home-link:hover {
+    color: #cc99ff;
+}
+
+header nav {
+    padding-left: 2%;
+}
+
+.nav-content {
+    
+}
+
+.nav-link {
+    max-width: 20%;
+    color: white;
+    text-decoration: none;
+    transition: color 0.5s ease-out 100ms;
+}
+
+.nav-link:hover {
+    color: #cc99ff;
+}
+
+i {
+    height: 100%;
+    width: 100%;
+}
+
+img {
+    max-width: 100%;
+}
+
+img.img-inverted {
+    filter: invert(1);
+}
+
+.pl-grid {
+    max-width: 50%;
+}
+
+.pl-grid-row {
+    display: flex;
+}
+
+.skills {
+    display: flex;
+}
+
+.pl-grid-column {
+    max-width: 33%;
+    margin: 10px;
+}
