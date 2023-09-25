@@ -24,7 +24,7 @@ body {
 .page-content {
     background-color: black;
     padding: 2rem;
-    height: 100vh;
+    height: 100%;
 }
 
 .page-border-wrap {
@@ -91,4 +91,19 @@ img.img-inverted {
 .pl-grid-column {
     max-width: 33%;
     margin: 10px;
+}
+
+.button-block {
+    display: flex;
+    justify-content: center;
+}
+
+.nonfunctional-block-item {
+    background: #09306c;
+    border: none;
+    color: white;
+    max-width: 33%;
+    text-align: center;
+    font-size: 24px;
+    margin: 5px;
 }
