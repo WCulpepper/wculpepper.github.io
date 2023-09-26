@@ -94,16 +94,17 @@ img.img-inverted {
 }
 
 .button-block {
-    display: flex;
+    display: inline-block;
     justify-content: center;
+    overflow:auto;
 }
 
 .nonfunctional-block-item {
     background: #09306c;
     border: none;
     color: white;
-    max-width: 33%;
+    max-width: auto;
     text-align: center;
     font-size: 24px;
-    margin: 5px;
+    margin: 3px;
 }
