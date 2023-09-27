@@ -108,3 +108,8 @@ img.img-inverted {
     font-size: 24px;
     margin: 3px;
 }
+
+.cg-link {
+    text-decoration: none;
+    color: cyan;
+}
