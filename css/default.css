@@ -1,7 +1,7 @@
 body {
     background-color: black;
     color: white;
-    font-family: "Montserrat";
+    font-family: "Montserrat", sans-serif;
     height: 100%;
 }
 
@@ -112,4 +112,14 @@ img.img-inverted {
 .cg-link {
     text-decoration: none;
     color: cyan;
+}
+
+.project-img {
+    justify-content: center;
+}
+
+.project-img img {
+    max-width: 500px;
+    max-height: 500px;
+    justify-content: center;
 }
